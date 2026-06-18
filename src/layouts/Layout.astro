@@ -1,0 +1,47 @@
+---
+import '@/styles/main.css'
+
+import { SEO } from 'astro-seo'
+
+export interface Props {
+  title?: string
+  description?: string
+  ogp?: {
+    type?: string
+    image?: string
+    url?: string
+  }
+}
+
+const { title = '', description = '', ogp = {} } = Astro.props
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <slot name="head" />
+    <SEO
+      title={title}
+      titleTemplate=`%s | デモ`
+      titleDefault={'デモ'}
+      description={description || 'デモサイトです'}
+      canonical={Astro.site?.origin + Astro.url.pathname}
+      openGraph={{
+        basic: Object.assign(
+          {
+            title,
+            type: 'website',
+            image: '',
+            url: Astro.site?.origin + Astro.url.pathname,
+          },
+          ogp
+        ),
+      }}
+    />
+  </head>
+  <body class="">
+    <slot />
+  </body>
+</html>

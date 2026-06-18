@@ -1,0 +1,32 @@
+---
+import Layout from '@/layouts/Layout.astro'
+
+type PageModule = {
+  pageTitle?: string
+}
+
+const pagesGlob = import.meta.glob<PageModule>('./**/*.astro', { eager: true })
+const pages = Object.entries(pagesGlob).map(([path, module]) => {
+  const url = new URL(path.replace('.astro', '/'), Astro.site?.origin)
+  const pageTitle = module.pageTitle
+
+  return {
+    url: url.pathname,
+    title: pageTitle,
+  }
+})
+---
+
+<Layout>
+  <h1>デモ</h1>
+
+  <ul>
+    {
+      pages.map((page) => (
+        <li>
+          <a href={page.url}>{page.title}</a>
+        </li>
+      ))
+    }
+  </ul>
+</Layout>
