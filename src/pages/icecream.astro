@@ -1,0 +1,64 @@
+---
+import IcecreamCarousel from '@/components/IcecreamCarousel.tsx'
+import iconCart from '@/images/icecream/icon-cart.svg'
+import iconUser from '@/images/icecream/icon-user.svg'
+import Layout from '@/layouts/Layout.astro'
+
+export const pageTitle = 'icecream'
+---
+
+<Layout title={pageTitle}>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kavoon&family=Lexend:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <header
+    class="@container fixed inset-x-0 top-0 z-10 mx-auto flex h-(--header-height) w-full max-w-[1920px] items-center gap-x-5.5 px-[2.6%] text-white">
+    <h1 class="font-display mr-auto text-[2rem]">Alec's</h1>
+    <button type="button" class="relative cursor-pointer">
+      <img
+        src={iconCart.src}
+        alt="cart"
+        width={iconCart.width}
+        height={iconCart.height}
+      />
+      <span
+        class="absolute top-0.5 right-0.5 grid aspect-square h-auto w-3 place-content-center rounded-full bg-[#EB5757] text-[0.625rem]/none text-white">
+        3
+      </span>
+    </button>
+    <span class="h-4 w-0.5 bg-current" aria-hidden="true"></span>
+    <button type="button" class="cursor-pointer">
+      <img
+        src={iconUser.src}
+        alt="user"
+        width={iconUser.width}
+        height={iconUser.height}
+      />
+    </button>
+  </header>
+
+  <IcecreamCarousel client:visible />
+</Layout>
+
+<style>
+  @import 'tailwindcss';
+
+  :root {
+    --font-sans: 'Lexend', sans-serif;
+    --font-display: 'Kavoon', serif;
+    --header-height: 4.25rem;
+  }
+
+  /* ビューポートが横長、または1024px以上 */
+  @custom-variant landscape {
+    @media (orientation: landscape), (width >= 64rem) {
+      @slot;
+    }
+  }
+</style>
