@@ -1,0 +1,30 @@
+---
+import HorizontalScroll from '@/components/HorizontalScroll.astro'
+import Layout from '@/layouts/Layout.astro'
+---
+
+<Layout title="Horizontal Scroll">
+  <div>
+    <p class="grid h-svh w-full place-content-center bg-neutral-600 text-white">
+      下へスクロールしてください
+    </p>
+    <div class="js-horizontal-scroll @container h-svh w-full">
+      <div class="grid h-full items-center overflow-clip">
+        <HorizontalScroll class="h-full">
+          {
+            Array.from({ length: 9 }).map((_, index) => (
+              <div
+                class="grid h-full w-[100cqi] shrink-0 place-content-center bg-(--color) text-[10cqi]"
+                style={`--color: oklch(${15 + 10 * index}% 0 0)`}>
+                <span class="text-white mix-blend-difference">{index + 1}</span>
+              </div>
+            ))
+          }
+        </HorizontalScroll>
+      </div>
+    </div>
+    <p class="grid h-svh w-full place-content-center bg-neutral-600 text-white">
+      おわり
+    </p>
+  </div>
+</Layout>

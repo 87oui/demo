@@ -1,0 +1,77 @@
+---
+import { twMerge } from 'tailwind-merge'
+
+const { class: className = '', ...props } = Astro.props
+---
+
+<div
+  class={twMerge('js-horizontal-scroll-container flex w-max', className)}
+  {...props}>
+  <slot />
+</div>
+
+<script>
+  import { gsap } from 'gsap'
+  import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+  gsap.registerPlugin(ScrollTrigger)
+
+  const initHorizontalScroll = () => {
+    const trigger = document.querySelector<HTMLElement>('.js-horizontal-scroll')
+    if (!trigger) return
+
+    const container = trigger.querySelector<HTMLElement>(
+      '.js-horizontal-scroll-container'
+    )
+    if (!container) return
+
+    const getScrollDistance = () => container.scrollWidth - trigger.offsetWidth
+
+    const tween = gsap.to(container, {
+      x: () => -getScrollDistance(),
+      ease: 'none',
+      scrollTrigger: {
+        trigger,
+        pin: true,
+        anticipatePin: 1,
+        scrub: 0.3,
+        start: 'top top',
+        end: () => `+=${getScrollDistance()}`,
+        invalidateOnRefresh: true,
+        snap: {
+          snapTo: 1 / (container.children.length - 1),
+          duration: { min: 0.2, max: 0.6 },
+          ease: 'none',
+        },
+      },
+    })
+
+    // 横スクロールしている間だけ、横スクロール（スワイプ）でもスクロールできるように
+    const st = tween.scrollTrigger!
+    trigger.addEventListener(
+      'wheel',
+      (event) => {
+        if (!st.isActive) return
+
+        if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+          event.preventDefault()
+          window.scrollBy(0, event.deltaX)
+        }
+      },
+      { passive: false }
+    )
+  }
+
+  const run = () => {
+    initHorizontalScroll()
+    ScrollTrigger.refresh()
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run)
+  } else {
+    run()
+  }
+
+  window.addEventListener('load', () => ScrollTrigger.refresh())
+</script>
