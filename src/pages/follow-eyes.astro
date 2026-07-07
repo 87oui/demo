@@ -1,0 +1,57 @@
+---
+import Layout from '@/layouts/Layout.astro'
+---
+
+<Layout title="Follow eyes">
+  <div
+    class="flex h-svh w-full items-center justify-center gap-10 bg-neutral-300">
+    {
+      Array.from({ length: 2 }).map(() => (
+        <div class="js-eye relative flex aspect-square h-auto w-[20vw] items-center justify-center overflow-clip rounded-full border border-neutral-500 bg-white">
+          <div class="js-pupil aspect-square h-auto w-[40%] rounded-full bg-neutral-900" />
+        </div>
+      ))
+    }
+  </div>
+</Layout>
+
+<script>
+  import { gsap } from 'gsap'
+
+  const initFollowEyes = () => {
+    const eyes = document.querySelectorAll<HTMLElement>('.js-eye')
+    const pupils = document.querySelectorAll<HTMLElement>('.js-pupil')
+
+    document.addEventListener('mousemove', (event) => {
+      eyes.forEach((eye, index) => {
+        // eyeの中心座標を取得
+        const eyeRect = eye.getBoundingClientRect()
+        const cx = eyeRect.left + eyeRect.width / 2
+        const cy = eyeRect.top + eyeRect.height / 2
+        // マウスカーソル座標を取得
+        const dx = event.clientX - cx
+        const dy = event.clientY - cy
+        // マウスカーソルとの距離と角度を計算
+        const angle = Math.atan2(dy, dx)
+        const maxDist = eyeRect.width / 2
+        const dist = Math.min(Math.hypot(dx, dy) / 6, maxDist)
+        gsap.to(pupils[index], {
+          x: Math.cos(angle) * dist,
+          y: Math.sin(angle) * dist,
+          duration: 0.3,
+          ease: 'poser2.out',
+        })
+      })
+    })
+  }
+
+  const run = () => {
+    initFollowEyes()
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run)
+  } else {
+    run()
+  }
+</script>
