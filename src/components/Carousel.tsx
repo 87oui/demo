@@ -1,5 +1,10 @@
 import type { EmblaCarouselType, EmblaOptionsType } from 'embla-carousel'
+import AutoScroll from 'embla-carousel-auto-scroll'
+import type { AutoScrollOptionsType } from 'embla-carousel-auto-scroll'
+import Autoplay from 'embla-carousel-autoplay'
+import type { AutoplayOptionsType } from 'embla-carousel-autoplay'
 import Fade from 'embla-carousel-fade'
+import type { FadeOptionsType } from 'embla-carousel-fade'
 import useEmblaCarousel from 'embla-carousel-react'
 import React, {
   createContext,
@@ -11,14 +16,12 @@ import React, {
 } from 'react'
 import { twMerge } from 'tailwind-merge'
 
-useEmblaCarousel.globalOptions = {
-  loop: true,
-}
-
 type CarouselContextValue = {
   emblaRef: (node: HTMLElement | null) => void
   scrollSnaps: number[]
   selectedSnap: number
+  canScrollPrev: boolean
+  canScrollNext: boolean
   scrollPrev: () => void
   scrollNext: () => void
   scrollTo: (index: number) => void
@@ -36,23 +39,42 @@ export const useCarousel = () => {
 }
 
 export const Carousel = ({
-  options,
-  fade = false,
+  options = {},
+  autoplayOptions,
+  autoScrollOptions,
+  fadeOptions,
   onEmblaScroll,
   className,
   children,
   ...props
 }: {
   options?: EmblaOptionsType
-  fade?: boolean
+  autoplayOptions?: AutoplayOptionsType
+  autoScrollOptions?: AutoScrollOptionsType
+  fadeOptions?: FadeOptionsType
   onEmblaScroll?: (emblaApi: EmblaCarouselType) => void
   className?: string
   children: React.ReactNode
 } & Omit<React.ComponentPropsWithoutRef<'div'>, 'children'>) => {
-  const plugins = useMemo(() => (fade ? [Fade()] : []), [fade])
-  const [emblaRef, emblaApi] = useEmblaCarousel(options, plugins)
+  const plugins = useMemo(() => {
+    const plugins = []
+    if (autoplayOptions) plugins.push(Autoplay(autoplayOptions))
+    if (autoScrollOptions) plugins.push(AutoScroll(autoScrollOptions))
+    if (fadeOptions) plugins.push(Fade(fadeOptions))
+
+    return plugins
+  }, [autoplayOptions, autoScrollOptions, fadeOptions])
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      loop: true,
+      ...options,
+    },
+    plugins
+  )
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([])
   const [selectedSnap, setSelectedSnap] = useState(0)
+  const [canScrollPrev, setCanScrollPrev] = useState(false)
+  const [canScrollNext, setCanScrollNext] = useState(false)
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
@@ -65,7 +87,11 @@ export const Carousel = ({
     if (!emblaApi) return
 
     const syncSnaps = () => setScrollSnaps(emblaApi.scrollSnapList())
-    const syncSelected = () => setSelectedSnap(emblaApi.selectedScrollSnap())
+    const syncSelected = () => {
+      setSelectedSnap(emblaApi.selectedScrollSnap())
+      setCanScrollPrev(emblaApi.canScrollPrev())
+      setCanScrollNext(emblaApi.canScrollNext())
+    }
 
     syncSnaps()
     syncSelected()
@@ -92,18 +118,29 @@ export const Carousel = ({
       emblaRef,
       scrollSnaps,
       selectedSnap,
+      canScrollPrev,
+      canScrollNext,
       scrollPrev,
       scrollNext,
       scrollTo,
     }),
-    [emblaRef, scrollSnaps, selectedSnap, scrollPrev, scrollNext, scrollTo]
+    [
+      emblaRef,
+      scrollSnaps,
+      selectedSnap,
+      canScrollPrev,
+      canScrollNext,
+      scrollPrev,
+      scrollNext,
+      scrollTo,
+    ]
   )
 
   return (
     <CarouselContext.Provider value={value}>
       <div
         role="group"
-        aria-roledescription="carousel"
+        aria-roledescription="カルーセル"
         className={twMerge(
           'embla w-full',
           '[--slide-size:100%] [--slide-spacing:0]',
@@ -139,7 +176,11 @@ export const CarouselTrack = ({
           'embla__container -ml-(--slide-spacing) flex h-full touch-pan-y touch-pinch-zoom',
           containerClassName
         )}>
-        {children}
+        {React.Children.map(children, (child, index) =>
+          React.isValidElement<{ index?: number }>(child)
+            ? React.cloneElement(child, { index })
+            : child
+        )}
       </div>
     </div>
   )
@@ -148,17 +189,20 @@ export const CarouselTrack = ({
 export const CarouselSlide = ({
   className,
   children,
-  index,
+  index = 0,
 }: {
   className?: string
   children: React.ReactNode
-  index: number
+  index?: number
 }) => {
-  const { selectedSnap } = useCarousel()
+  const { selectedSnap, scrollSnaps } = useCarousel()
+  const total = scrollSnaps.length
 
   return (
     <div
-      aria-roledescription="slide"
+      role="group"
+      aria-roledescription="スライド"
+      aria-label={total ? `${index + 1} / ${total}` : undefined}
       aria-current={selectedSnap === index}
       className={twMerge(
         'embla__slide min-w-0 shrink-0 grow-0 basis-(--slide-size) pl-(--slide-spacing)',
@@ -202,9 +246,10 @@ const CarouselNextIcon = () => (
 export const CarouselPrev = ({
   className,
   children,
+  disabled,
   ...props
 }: React.ComponentPropsWithoutRef<'button'>) => {
-  const { scrollPrev } = useCarousel()
+  const { scrollPrev, canScrollPrev } = useCarousel()
 
   return (
     <button
@@ -212,6 +257,7 @@ export const CarouselPrev = ({
       className={twMerge('embla__prev cursor-pointer', className)}
       aria-label="前へ"
       onClick={scrollPrev}
+      disabled={disabled ?? !canScrollPrev}
       {...props}>
       {children ?? <CarouselPrevIcon />}
     </button>
@@ -221,9 +267,10 @@ export const CarouselPrev = ({
 export const CarouselNext = ({
   className,
   children,
+  disabled,
   ...props
 }: React.ComponentPropsWithoutRef<'button'>) => {
-  const { scrollNext } = useCarousel()
+  const { scrollNext, canScrollNext } = useCarousel()
 
   return (
     <button
@@ -231,6 +278,7 @@ export const CarouselNext = ({
       className={twMerge('embla__next cursor-pointer', className)}
       aria-label="次へ"
       onClick={scrollNext}
+      disabled={disabled ?? !canScrollNext}
       {...props}>
       {children ?? <CarouselNextIcon />}
     </button>
@@ -247,13 +295,16 @@ export const CarouselDots = ({
   const { scrollSnaps, selectedSnap, scrollTo } = useCarousel()
 
   return (
-    <div className={twMerge('embla__dots flex gap-2', className)}>
+    <div
+      role="group"
+      aria-label="スライドを選択"
+      className={twMerge('embla__dots flex gap-2', className)}>
       {scrollSnaps.map((_, index) => (
         <button
           key={index}
           type="button"
           className={twMerge('embla__dot', dotClassName)}
-          aria-label={`Go to slide ${index + 1}`}
+          aria-label={`スライド${index + 1} / ${scrollSnaps.length}`}
           aria-current={selectedSnap === index}
           onClick={() => scrollTo(index)}></button>
       ))}

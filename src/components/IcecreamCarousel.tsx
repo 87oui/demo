@@ -95,7 +95,7 @@ export default function IcecreamCarousel({
 
   return (
     <Carousel
-      fade={true}
+      fadeOptions={{}}
       onEmblaScroll={handleScroll}
       options={{
         align: 'center',
@@ -112,7 +112,6 @@ export default function IcecreamCarousel({
           ({ image, ingredient, title, caption, color }, index) => (
             <CarouselSlide
               key={index}
-              index={index}
               className="group overflow-y-clip px-[2cqi]">
               <div
                 className="relative grid h-full w-full grid-cols-[2fr_6fr_2fr] grid-rows-[auto_1fr] place-items-end pt-(--header-height) landscape:grid-cols-[min(28.9cqi,555px)_min(3.3cqi,65px)_min(3.125cqi,60px)_min(25cqi,480px)_min(3.125cqi,60px)_min(3.3cqi,65px)_min(28.9cqi,555px)] landscape:grid-rows-1"
