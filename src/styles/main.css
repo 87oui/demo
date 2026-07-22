@@ -11,3 +11,9 @@
     interpolate-size: allow-keywords;
   }
 }
+
+@layer components {
+  .container {
+    @apply mx-auto px-5;
+  }
+}
