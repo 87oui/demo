@@ -1,0 +1,33 @@
+---
+import { ClientRouter } from 'astro:transitions'
+
+import type { ComponentProps } from 'astro/types'
+
+import Layout from '@/layouts/Layout.astro'
+
+import '@/styles/main.css'
+
+export type Props = ComponentProps<typeof Layout>
+---
+
+<Layout {...Astro.props}>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <ClientRouter />
+  </Fragment>
+
+  <slot />
+</Layout>
+
+<style>
+  @import 'tailwindcss';
+
+  :root {
+    --font-sans: 'Noto Sans JP', sans-serif;
+  }
+</style>

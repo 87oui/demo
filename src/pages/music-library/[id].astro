@@ -1,0 +1,174 @@
+---
+import { Image } from 'astro:assets'
+
+import { XMarkIcon } from '@heroicons/react/24/solid'
+
+import itunesStore from '@/images/music-library/itunes_store.svg'
+import Layout from '@/layouts/MusicLibrary.astro'
+import dayjs from '@/libs/dayjs'
+import { getAlbums } from '@/libs/itunes'
+
+export const prerender = true
+
+export const getStaticPaths = async () => {
+  const collections = await getAlbums({ term: 'J-Pop', limit: 200 })
+
+  return collections.map((collection) => ({
+    params: {
+      id: collection.collectionId.toString(),
+    },
+    props: { collection },
+  }))
+}
+
+const { collection } = Astro.props
+---
+
+<Layout title={collection.collectionName}>
+  <div
+    class="relative grid h-svh w-full justify-items-center sm:place-content-center">
+    <a
+      href="/music-library"
+      class="absolute inset-0 cursor-none"
+      aria-label="ミュージックライブラリに戻る"
+      data-backdrop-close></a>
+    <div
+      class="pointer-events-none fixed top-0 left-0 z-50 size-6 -translate-x-1/2 -translate-y-1/2 text-neutral-600 opacity-0"
+      data-backdrop-cursor
+      aria-hidden="true"
+      hidden>
+      <XMarkIcon className="size-12" />
+    </div>
+    <div
+      class="relative z-1 grid h-svh w-full max-w-sm content-start gap-y-4 overflow-hidden p-8 text-white sm:aspect-9/16 sm:h-auto sm:rounded-2xl">
+      <img
+        src={collection.artworkUrl100}
+        alt=""
+        width="100"
+        height="100"
+        class="absolute inset-0 -z-1 h-full w-full scale-125 object-cover blur-2xl contrast-75"
+      />
+      <img
+        src={collection.artworkUrl100}
+        alt=""
+        width="100"
+        height="100"
+        class="m-5 place-self-center"
+        transition:name={`artwork-${collection.collectionId}`}
+      />
+
+      <div class="grid">
+        <h1 class="font-bold">
+          <a
+            href={collection.collectionViewUrl}
+            class={collection.collectionViewUrl && 'hover:underline'}>
+            {collection.collectionName}
+          </a>
+        </h1>
+        <p>
+          <a
+            href={collection.artistViewUrl}
+            class={collection.artistViewUrl && 'hover:underline'}>
+            {collection.artistName}
+          </a>
+        </p>
+      </div>
+
+      <a href={collection.collectionViewUrl} class="justify-self-end">
+        <Image src={itunesStore} alt="Get it on iTunes Store" />
+      </a>
+
+      <dl
+        class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 rounded-lg bg-white/20 p-4 text-sm">
+        {
+          [
+            {
+              label: 'ジャンル',
+              value: collection.primaryGenreName,
+            },
+            {
+              label: 'トラック数',
+              value: collection.trackCount,
+            },
+            {
+              label: 'リリース日',
+              value: dayjs(collection.releaseDate).format('YYYY/MM/DD'),
+            },
+          ].map(({ label, value }) => (
+            <>
+              <dt class="font-medium">{label}</dt>
+              <dd>{value}</dd>
+            </>
+          ))
+        }
+      </dl>
+
+      <p class="text-xs">
+        アートワークは
+        <a
+          href="https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/index.html"
+          class="underline">
+          iTunes Search API
+        </a>
+        から取得しています。これは技術デモです。
+      </p>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  let cleanupBackdropCursor: (() => void) | null = null
+
+  // 背景をクリックすると一覧へ戻る カーソル改変
+  const setupBackdropCursor = () => {
+    // ページ遷移ごとにこの関数が走るので、一旦前回のイベントリスナーを削除してnullを代入
+    cleanupBackdropCursor?.()
+    cleanupBackdropCursor = null
+
+    const backdrop = document.querySelector('[data-backdrop-close]')
+    const cursor = document.querySelector('[data-backdrop-cursor]')
+    if (
+      !(backdrop instanceof HTMLElement) ||
+      !(cursor instanceof HTMLElement)
+    ) {
+      return
+    }
+
+    // イベントリスナーをまとめて管理する
+    const abort = new AbortController()
+    const { signal } = abort
+
+    backdrop.addEventListener(
+      'pointerenter',
+      () => {
+        cursor.hidden = false
+        cursor.style.opacity = '1'
+      },
+      { signal }
+    )
+    backdrop.addEventListener(
+      'pointerleave',
+      () => {
+        cursor.hidden = true
+        cursor.style.opacity = '0'
+      },
+      { signal }
+    )
+    backdrop.addEventListener(
+      'pointermove',
+      (event) => {
+        cursor.style.left = `${event.clientX}px`
+        cursor.style.top = `${event.clientY}px`
+      },
+      { signal }
+    )
+
+    // `abort.signal`に紐つけたイベントリスナーを解除
+    cleanupBackdropCursor = () => abort.abort()
+  }
+
+  // マウスなどポインターデバイスのみ
+  if (matchMedia('(pointer: fine)').matches) {
+    document.addEventListener('astro:page-load', setupBackdropCursor)
+  }
+</script>
