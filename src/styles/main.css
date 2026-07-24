@@ -10,6 +10,10 @@
   :root {
     interpolate-size: allow-keywords;
   }
+
+  button {
+    @apply cursor-pointer;
+  }
 }
 
 @layer components {

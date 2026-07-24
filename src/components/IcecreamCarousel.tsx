@@ -65,7 +65,7 @@ function IcecreamCarouselNav({ className }: { className?: string }) {
           <button
             key={index}
             type="button"
-            className="w-[12.7cqi] cursor-pointer transition-transform hover:scale-105"
+            className="w-[12.7cqi] transition-transform hover:scale-105"
             aria-label={`${title}へ移動`}
             onClick={() => scrollTo(index)}>
             <img

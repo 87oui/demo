@@ -254,7 +254,7 @@ export const CarouselPrev = ({
   return (
     <button
       type="button"
-      className={twMerge('embla__prev cursor-pointer', className)}
+      className={twMerge('embla__prev', className)}
       aria-label="前へ"
       onClick={scrollPrev}
       disabled={disabled ?? !canScrollPrev}
@@ -275,7 +275,7 @@ export const CarouselNext = ({
   return (
     <button
       type="button"
-      className={twMerge('embla__next cursor-pointer', className)}
+      className={twMerge('embla__next', className)}
       aria-label="次へ"
       onClick={scrollNext}
       disabled={disabled ?? !canScrollNext}
