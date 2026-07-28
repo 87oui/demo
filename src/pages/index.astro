@@ -1,6 +1,8 @@
 ---
 import { Image } from 'astro:assets'
 
+import { LinkIcon } from '@heroicons/react/24/outline'
+
 import iconGitHub from '@/images/icon-github.svg'
 import Layout from '@/layouts/Layout.astro'
 import '@/styles/main.css'
@@ -18,57 +20,115 @@ import '@/styles/main.css'
       </a>
     </div>
 
-    <dl>
-      <dt><a href="/icecream">Icecream</a></dt>
-      <dd>
-        <p>
+    <div>
+      <section id="icecream">
+        <h2 class="group relative flex w-fit items-baseline">
+          <a href="/icecream">Icecream</a>
+          <a
+            href={`${Astro.site?.origin + Astro.url.pathname}/#icecream`}
+            class="absolute right-full opacity-0 transition-opacity group-hover:opacity-100">
+            <LinkIcon className="aspect-square h-auto w-[1lh] p-1" />
+          </a>
+        </h2>
+        <pn>
           スライドが切り替わるごとにトランジションアニメーションを行うカルーセルです。スライド内部はビューポートのアスペクト比によってレイアウトを変えるレスポンシブデザインになっています。ボタンにもトランジションアニメーションを加えています。
-        </p>
-        <p>
-          スライダーライブラリ: Embla Carousel<br />
-          デザイン: <a
-            href="https://www.figma.com/community/file/1442039011845968196/ice-cream-transition"
-            target="_blank">Figma Community</a
-          >
-        </p>
-      </dd>
-      <dt><a href="/scrubbed-gallery">scrubbed-gallery</a></dt>
-      <dd>
-        <p>
+        </pn>
+        <dl>
+          <dt>スライダーライブラリ</dt>
+          <dd>Embla Carousel</dd>
+          <dt>デザイン</dt>
+          <dd>
+            <a
+              href="https://www.figma.com/community/file/1442039011845968196/ice-cream-transition"
+              target="_blank">
+              "Ice Cream Transition" by Mustafa Lanewala (Figma Community)
+            </a> / <a
+              href="https://creativecommons.org/licenses/by/4.0/"
+              target="_blank">
+              CC BY 4.0
+            </a>
+          </dd>
+        </dl>
+      </section>
+      <section id="scrubbed-gallery">
+        <h2 class="group relative flex w-fit items-baseline">
+          <a href="/scrubbed-gallery"> scrubbed-gallery</a>
+          <a
+            href={`${Astro.site?.origin + Astro.url.pathname}/#scrubbed-gallery`}
+            class="absolute right-full opacity-0 transition-opacity group-hover:opacity-100">
+            <LinkIcon className="aspect-square h-auto w-[1lh] p-1" />
+          </a>
+        </h2>
+        <pn>
           GSAPのScrollTriggerとFlipを使って、スクロールに合わせて中央の画像が拡大し、画面いっぱいになったところで上へ流れていく演出のデモです。端末OSの視覚効果の設定によってアニメションを抑制する実装にしています。GSAP公式ギャラリーのデモをもとに、Tailwind
           CSSでスタイリングしています。また、タイトルを追加し、アニメーションに合わせてタイポグラフィが変わるようにしています。
-        </p>
-        <p>
-          アニメーションライブラリ: GSAP<br />
-          出典： <a href="https://demos.gsap.com/demo/scrubbed-bento-gallery/"
-            >Scrubbed bento gallery</a
-          >
-        </p>
-      </dd>
-      <dt><a href="/music-library">music-library</a></dt>
-      <dd>
-        <p>
+        </pn>
+        <dl>
+          <dt>アニメーションライブラリ</dt>
+          <dd>GSAP</dd>
+          <dt>出典</dt>
+          <dd>
+            <a
+              href="https://demos.gsap.com/demo/scrubbed-bento-gallery/"
+              target="_blank">
+              Scrubbed bento gallery
+            </a>
+          </dd>
+        </dl>
+      </section>
+      <section id="music-library">
+        <h2 class="group relative flex w-fit items-baseline">
+          <a href="/music-library"> music-library</a>
+          <a
+            href={`${Astro.site?.origin + Astro.url.pathname}/#music-library`}
+            class="absolute right-full opacity-0 transition-opacity group-hover:opacity-100">
+            <LinkIcon className="aspect-square h-auto w-[1lh] p-1" />
+          </a>
+        </h2>
+        <pn>
           AstroのClientRouter（View
           Transitions）を使って、一覧画面と詳細画面の間でページ遷移する際にアートワーク画像が移動するアニメーションを加えるデモです。アートワーク画像を含めた楽曲データはiTunes
           Search APIを使って取得しています。
-        </p>
-        <p>
-          フレームワーク: Astro<br />
-          データ: iTunes Search API
-        </p>
-      </dd>
-      <dt><a href="/scroll-trigger">scroll-trigger</a></dt>
-      <dd>
-        <p>
+        </pn>
+        <dl>
+          <dt>フレームワーク</dt>
+          <dd>Astro</dd>
+          <dt>データ</dt>
+          <dd>iTunes Search API</dd>
+        </dl>
+      </section>
+      <section id="scroll-trigger">
+        <h2 class="group relative flex w-fit items-baseline">
+          <a href="/scroll-trigger"> scroll-trigger</a>
+          <a
+            href={`${Astro.site?.origin + Astro.url.pathname}/#scroll-trigger`}
+            class="absolute right-full opacity-0 transition-opacity group-hover:opacity-100">
+            <LinkIcon className="aspect-square h-auto w-[1lh] p-1" />
+          </a>
+        </h2>
+        <pn>
           GSAPのScrollTriggerを使って、特定のエリアまでスクロールすると横スクロールに切り替わるデモです。横スクロールエリアに入ると、スワイプ（横スクロール）してもスクロールできます。
-        </p>
-        <p>アニメーションライブラリ: GSAP</p>
-      </dd>
-      <dt><a href="/follow-eyes">follow-eyes（タッチデバイス非対応）</a></dt>
-      <dd>
-        <p>マウスカーソルに追従する目玉のアニメーションのデモです。</p>
-        <p>アニメーションライブラリ: GSAP</p>
-      </dd>
-    </dl>
+        </pn>
+        <dl>
+          <dt>アニメーションライブラリ</dt>
+          <dd>GSAP</dd>
+        </dl>
+      </section>
+      <section id="follow-eyes">
+        <h2 class="group relative flex w-fit items-baseline">
+          <a href="/follow-eyes"> follow-eyes（タッチデバイス非対応） </a>
+          <a
+            href={`${Astro.site?.origin + Astro.url.pathname}/#follow-eyes`}
+            class="absolute right-full opacity-0 transition-opacity group-hover:opacity-100">
+            <LinkIcon className="aspect-square h-auto w-[1lh] p-1" />
+          </a>
+        </h2>
+        <pn>マウスカーソルに追従する目玉のアニメーションのデモです。</pn>
+        <dl>
+          <dt>アニメーションライブラリ</dt>
+          <dd>GSAP</dd>
+        </dl>
+      </section>
+    </div>
   </div>
 </Layout>
