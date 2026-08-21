@@ -46,7 +46,9 @@ import '@/styles/main.css'
               href="https://creativecommons.org/licenses/by/4.0/"
               target="_blank">
               CC BY 4.0
-            </a>
+            </a><br />
+            ※モバイル端末（<code>orientation: portrait</code
+            >）でのデザインは実装者が追加しました。
           </dd>
         </dl>
       </section>
@@ -59,9 +61,12 @@ import '@/styles/main.css'
             <LinkIcon className="aspect-square h-auto w-[1lh] p-1" />
           </a>
         </h2>
-          GSAPのScrollTriggerとFlipを使って、スクロールに合わせて中央の画像が拡大し、画面いっぱいになったところで上へ流れていく演出のデモです。端末OSの視覚効果の設定によってアニメションを抑制する実装にしています。GSAP公式ギャラリーのデモをもとに、Tailwind
-          CSSでスタイリングしています。また、タイトルを追加し、アニメーションに合わせてタイポグラフィが変わるようにしています。
         <p>
+          GSAPのScrollTriggerとFlipを使って、スクロールに合わせて中央の画像が拡大し、画面いっぱいになったところで上へ流れていく演出のデモです。GSAP公式ギャラリーのデモをもとに、Tailwind
+          CSSでスタイリングしています。<br />
+          端末OSの視覚効果の設定（<code>prefers-reduced-motion</code
+          >）によってアニメションを抑制する実装にしています。<br />
+          また、タイトルを追加し、アニメーションに合わせてタイポグラフィが変わるようにしています（バリアブルフォントのため、フォントサイズだけでなくフォントウェイトもなめらかに変わります）。
         </p>
         <dl>
           <dt>アニメーションライブラリ</dt>
