@@ -1,0 +1,244 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import { twMerge } from 'tailwind-merge'
+import '@/styles/main.css'
+
+const categories = ['category1', 'category2', 'category3']
+const categoriesLength = categories.length
+
+const images = Array.from({ length: 12 }).map((_, index) => {
+  return {
+    src: `https://picsum.photos/seed/${index}/600/800`,
+    width: 600,
+    height: 800,
+    category: categories[index % categoriesLength],
+  }
+})
+---
+
+<Layout title="Flip Gallery">
+  <div class="@container container max-w-4xl">
+    <div class="flex flex-wrap justify-center gap-1 py-8">
+      {
+        ['all'].concat(categories).map((category) => (
+          <label
+            class={twMerge(
+              'relative cursor-pointer rounded-full border border-gray-800 px-8 py-1.5 text-center capitalize',
+              'has-checked:bg-gray-800 has-checked:text-white'
+            )}>
+            <input
+              type="checkbox"
+              name="category"
+              value={category}
+              id={category}
+              checked
+              class={twMerge('sr-only', category !== 'all' && 'filter')}
+            />
+            {category}
+          </label>
+        ))
+      }
+    </div>
+    <div class="flex flex-wrap justify-center gap-2">
+      {
+        images.map((image) => (
+          <figure
+            data-category={image.category}
+            class={twMerge(
+              'item',
+              'grid aspect-square h-auto w-[45cqi] max-w-50 place-items-end rounded-lg'
+            )}>
+            <img
+              src={image.src}
+              alt=""
+              width={image.width}
+              height={image.height}
+              class="col-start-1 row-start-1 aspect-square h-auto w-full object-cover"
+            />
+            <figcaption class="relative col-start-1 row-start-1 m-2 rounded-full bg-white/40 px-2 text-sm capitalize">
+              {image.category}
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+    <dialog id="modal" aria-label="拡大画像"></dialog>
+  </div>
+</Layout>
+
+<style is:global>
+  @import 'tailwindcss';
+
+  #modal {
+    @apply bg-transparent;
+    @apply backdrop:bg-black/45;
+
+    &[open] {
+      @apply inset-0 m-0 grid h-auto max-h-none w-auto max-w-none place-items-center overflow-hidden border-0 p-0 outline-none;
+    }
+
+    img {
+      @apply aspect-3/4 w-[min(75svh,40rem)];
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap'
+  import { Flip } from 'gsap/Flip'
+
+  gsap.registerPlugin(Flip)
+
+  const allCheckbox = document.querySelector<HTMLInputElement>('#all')
+  const filters = gsap.utils.toArray<HTMLInputElement>('.filter')
+  const items = gsap.utils.toArray<HTMLElement>('.item')
+  const modal = document.querySelector<HTMLDialogElement>('#modal')
+  const images = gsap.utils.toArray<HTMLElement>('.item img')
+  const DEFAULT_INDEX = -1
+  let currentIndex = DEFAULT_INDEX
+
+  // アニメーションを行うかどうかをブラウザの設定に合わせて返す
+  const flipDuration = () =>
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.7
+
+  // モーダルを開く
+  const openModal = (image: HTMLElement, index: number) => {
+    if (!modal) return
+
+    const state = Flip.getState(image)
+
+    modal.appendChild(image)
+    currentIndex = index
+    if (!modal.open) modal.showModal()
+
+    const duration = flipDuration()
+    Flip.from(state, {
+      duration,
+      ease: 'power1.inOut',
+    })
+  }
+
+  // モーダルを閉じる
+  const closeModal = (image: HTMLElement) => {
+    if (!modal?.open || currentIndex === DEFAULT_INDEX) return
+
+    const item = items[currentIndex]
+    if (!item) return
+
+    const state = Flip.getState(image)
+
+    currentIndex = DEFAULT_INDEX
+    item.appendChild(image)
+    modal.close()
+    gsap.set(image, { zIndex: 5 })
+
+    const duration = flipDuration()
+    Flip.from(state, {
+      duration,
+      ease: 'power1.inOut',
+      absolute: true,
+      onComplete: () => {
+        gsap.set(image, { clearProps: 'zIndex' })
+      },
+    })
+  }
+
+  // モーダルのセットアップ
+  const setupModal = () => {
+    if (!modal) return
+
+    // 各画像をクリックした時の処理
+    images.forEach((image, index) => {
+      image.addEventListener('click', () => {
+        if (Flip.isFlipping(image)) return
+
+        // モーダルが閉じていた＝currentIndexがデフォルト値の場合はモーダルを開く
+        if (currentIndex === DEFAULT_INDEX) {
+          openModal(image, index)
+          return
+        }
+
+        // currentIndexがクリックした画像のindexならモーダルを閉じる
+        if (index === currentIndex) closeModal(image)
+      })
+    })
+
+    // モーダルがクリックされた時の処理
+    modal.addEventListener('click', (event) => {
+      if (event.target !== modal) return
+
+      const image = modal.querySelector('img')
+      if (!(image instanceof HTMLElement) || Flip.isFlipping(image)) return
+
+      closeModal(image)
+    })
+
+    // モーダルがキャンセルされた時（escキー押下など）の処理
+    modal.addEventListener('cancel', (event) => {
+      event.preventDefault()
+
+      const image = modal.querySelector('img')
+      if (!(image instanceof HTMLElement) || Flip.isFlipping(image)) return
+
+      // キャンセル処理中に close() しても dialog は閉じない
+      setTimeout(() => closeModal(image), 0)
+    })
+  }
+  setupModal()
+
+  // カテゴリ切り替え処理
+  const updateFilters = () => {
+    if (!allCheckbox) return
+
+    // 選択されたカテゴリのセレクタを取得
+    const selectors = filters
+      .filter((checkbox) => checkbox.checked)
+      .map((checkbox) => `[data-category="${checkbox.id}"]`)
+    // 選択されたカテゴリの要素を取得
+    const matches = selectors.length
+      ? gsap.utils.toArray<HTMLElement>(selectors.join(','))
+      : []
+
+    // 選択してカテゴリのみ表示する
+    const applyVisibility = () => {
+      items.forEach(
+        (item) =>
+          (item.style.display = matches.indexOf(item) === -1 ? 'none' : 'grid')
+      )
+    }
+
+    // 表示・非表示切り替えアニメーションを実行
+    const duration = flipDuration()
+    if (duration > 0) {
+      const state = Flip.getState(items)
+      applyVisibility()
+      Flip.from(state, {
+        duration,
+        scale: true,
+        ease: 'power1.inOut',
+        stagger: 0.08,
+        absolute: true,
+        onEnter: (elements) =>
+          gsap.fromTo(
+            elements,
+            { opacity: 0, scale: 0 },
+            { opacity: 1, scale: 1, duration }
+          ),
+        onLeave: (elements) =>
+          gsap.to(elements, { opacity: 0, scale: 0, duration }),
+      })
+    } else {
+      applyVisibility()
+    }
+
+    // 全てのカテゴリが選択されているかどうかをAllボタンのチェック状態に同期
+    allCheckbox.checked = matches.length === items.length
+  }
+
+  // カテゴリボタンをクリックしたら表示を更新
+  filters.forEach((btn) => btn.addEventListener('click', updateFilters))
+  allCheckbox?.addEventListener('click', () => {
+    filters.forEach((checkbox) => (checkbox.checked = allCheckbox.checked))
+    updateFilters()
+  })
+</script>

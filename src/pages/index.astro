@@ -21,6 +21,36 @@ import '@/styles/main.css'
     </div>
 
     <div>
+      <section id="flip-gallery">
+        <h2 class="group relative flex w-fit items-baseline">
+          <a href="/flip-gallery">Flip Gallery</a>
+          <a
+            href={`${Astro.site?.origin + Astro.url.pathname}/#flip-gallery`}
+            class="absolute right-full opacity-0 transition-opacity group-hover:opacity-100">
+            <LinkIcon className="aspect-square h-auto w-[1lh] p-1" />
+          </a>
+        </h2>
+        <p>
+          カテゴリボタンをクリックするごとにリアルタイムにアイテムを絞り込み、サムネイル画像をクリックするとモーダルで拡大表示するギャラリーです。絞り込みと画像の拡大縮小の際にアニメーションを行います。<br
+          />
+          参考元ではモーダルにdiv要素を使っていましたが、dialog要素を使うことで画像外側のクリックやescキーでモーダルを閉じられるように実装しました。<br
+          />
+          端末OSの視覚効果の設定（<code>prefers-reduced-motion</code
+          >）によってアニメションを抑制する実装にしています。
+        </p>
+        <dl>
+          <dt>アニメーションライブラリ</dt>
+          <dd>GSAP</dd>
+          <dt>出典</dt>
+          <dd>
+            <a href="https://demos.gsap.com/demo/flip-gallery-modal/"
+              >FLIP gallery modal</a
+            >、<a href="https://demos.gsap.com/demo/flexbox-filtering/"
+              >Flexbox Filtering</a
+            >
+          </dd>
+        </dl>
+      </section>
       <section id="icecream">
         <h2 class="group relative flex w-fit items-baseline">
           <a href="/icecream">Icecream</a>
